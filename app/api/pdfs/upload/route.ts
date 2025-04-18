@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
 
     if (res.success && res.result) {
       const fileUrl = res.result.secure_url;
+      const publicId = res.result.public_id;
 
       // Connect to database
       await connectDB();
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
         filename: file.name,
         uniqueLink: uuidv4(),
         fileUrl,
+        publicId,
         comments: [],
         sharedWith: [],
       });

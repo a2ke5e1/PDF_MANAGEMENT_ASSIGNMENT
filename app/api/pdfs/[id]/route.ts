@@ -4,6 +4,7 @@ import connectDB from "@/lib/db";
 import PDF from "@/models/pdf";
 import Comment from "@/models/comment";
 import { authenticateRequest } from "@/lib/auth";
+import { cloudinary } from "@/lib/cloudinary";
 // import { deleteFile, getSignedUrl } from "@/lib/gcp-storage"
 
 export async function GET(
@@ -74,7 +75,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Validate ID
     if (!isValidObjectId(id)) {
@@ -96,6 +97,8 @@ export async function DELETE(
       userId: auth.userId, // Only the owner can delete
     });
 
+    const publicId = pdf.publicId;
+
     if (!pdf) {
       return NextResponse.json(
         { message: "PDF not found or access denied" },
@@ -104,7 +107,9 @@ export async function DELETE(
     }
 
     // Delete file from storage
-    // await deleteFile(pdf.fileUrl)
+    cloudinary.uploader.destroy(publicId, function (error, result) {
+      console.log(result, error);
+    });
 
     // Delete comments
     await Comment.deleteMany({ pdfId: id });
